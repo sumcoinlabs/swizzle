@@ -27,6 +27,7 @@ SITE_ACCENT_COLOR = os.getenv("SITE_ACCENT_COLOR", "#076dd7")
 INSTALLED_APPS = [
     "home", "newsroom", "publishers", "billing", "accounts", "website",
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
+    "django.contrib.sitemaps",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
     "wagtail.contrib.forms", "wagtail.contrib.redirects", "wagtail.contrib.sitemaps",
     "wagtail.embeds", "wagtail.sites", "wagtail.locales", "wagtail.users", "wagtail.snippets",

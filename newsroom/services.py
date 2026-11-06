@@ -2,6 +2,7 @@
 import html
 import json
 import logging
+import ipaddress
 from urllib.parse import urlparse
 
 import bleach
@@ -24,9 +25,20 @@ def collect_feed(source):
     if not source.is_active:
         return 0
     parsed = urlparse(source.url)
-    if parsed.scheme != "https" or not parsed.hostname:
-        raise NewsroomError("Feed URL must be HTTPS")
-    response = requests.get(source.url, timeout=(5, 15), stream=True, headers={"User-Agent": f"{settings.SITE_NAME.replace(chr(32), '')}NewsBot/0.1 (+RSS feed reader)"})
+    if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.port not in (None, 443):
+        raise NewsroomError("Feed URL must be a safe HTTPS URL")
+    try:
+        ipaddress.ip_address(parsed.hostname)
+    except ValueError:
+        pass
+    else:
+        raise NewsroomError("IP literal feed URLs are not permitted")
+    # Never automatically follow to an unvetted host or an internal service.
+    response = requests.get(source.url, timeout=(5, 15), stream=True, allow_redirects=False,
+                            headers={"User-Agent": "SwizzleEditorialRSS/0.2"})
+    if 300 <= response.status_code < 400:
+        response.close()
+        raise NewsroomError("Feed redirected; verify canonical HTTPS URL manually")
     response.raise_for_status()
     chunks = []
     size = 0
@@ -35,7 +47,11 @@ def collect_feed(source):
         if size > MAX_FEED_BYTES:
             raise NewsroomError("Feed exceeded maximum size")
         chunks.append(chunk)
-    feed = feedparser.parse(b"".join(chunks))
+    response.close()
+    raw = b"".join(chunks)
+    if b"<!DOCTYPE" in raw.upper() or b"<!ENTITY" in raw.upper():
+        raise NewsroomError("DTD and XML entities are not accepted in feeds")
+    feed = feedparser.parse(raw)
     made = 0
     for entry in feed.entries[:40]:
         url = str(entry.get("link", ""))[:1200]
@@ -84,7 +100,7 @@ def generate_ai_brief(candidate):
     result = json.loads(response.json()["choices"][0]["message"]["content"])
     if not isinstance(result, dict) or not isinstance(result.get("paragraphs"), list):
         raise NewsroomError("Malformed AI brief")
-    if len(result["paragraphs"]) < 2 or any(not isinstance(p, str) or len(p) > 1200 for p in result["paragraphs"]):
+    if len(result["paragraphs"]) < 2 or len(result["paragraphs"]) > 3 or any(not isinstance(p, str) or len(p) > 1200 for p in result["paragraphs"]):
         raise NewsroomError("Insufficient or oversized AI brief")
     return result
 
@@ -110,7 +126,7 @@ def draft_candidate(candidate):
         if not news_index:
             raise NewsroomError("Run bootstrap_site first")
         page = news_index.add_child(instance=ArticlePage(
-            title=title, slug=article_slug(title, candidate.url), kind="editorial",
+            title=title, slug=article_slug(title, candidate.url), kind="editorial", live=False,
             category=candidate.source.category, summary=summary, body=body,
             source_name=candidate.source.name, source_url=candidate.url,
             byline=settings.SITE_NAME + " News Desk", ai_assisted=True,

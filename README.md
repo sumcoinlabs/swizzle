@@ -20,9 +20,10 @@
 ## Important limitations
 
 - No live Stripe credentials, real transactions, domain, server or operational staff team yet; platform is **not** live.
-- The original DigiByte v0.6 newsroom source is on the user's Mac and **is not included**; the new `newsroom/services.py` is a standalone adapter and processing baseline. Live DigiByte files were not modified.
+- The **public** DigiByte v0.6 source lives at `sumcoinlabs/dgb-newsroom-engine`. Swizzle includes an optional, read-only import bridge for its vetted feed catalog and SQLite draft exports. It does not run the private DigiByte editorial service or change its production databases. See `docs/DGB_BRIDGE.md`.
 - Wagtail News Starter Kit was evaluated as an architectural reference; this is an original Wagtail project rather than a verbatim copy of that template.
 - No third-party distribution network, accepted OTC integrated newswire status, SEC filing, guaranteed Google News placement or automated verification of original financial disclosures.
+- Public HTTP staging must **only** be accessed through an SSH tunnel; never enter credentials or activate Stripe on a publicly exposed plain-HTTP host.
 - First setup generates migrations because no Python packages/PostgreSQL were available in the build environment. Commit reviewed migration files before a public deploy; CI exercises this bootstrap path.
 - Regulatory text, automated fraud review, 2FA, comprehensive rate limiting, subscription self-service cancellation, refund workflows, company owner verification, policy pages and production monitoring must be finished before commercial launch.
 

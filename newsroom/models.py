@@ -1,6 +1,6 @@
 import hashlib
 from django.db import models
-from wagtail import index
+from wagtail.search import index
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField
 from wagtail.models import Page

@@ -24,4 +24,4 @@ class EditorialFeed(AllArticlesFeed):
         return f"{settings.SITE_NAME} — Editorial"
     description = "Independent newsroom output and original news briefs"
     def items(self):
-        return super().items().filter(kind="editorial")
+        return ArticlePage.objects.live().public().filter(kind="editorial").order_by("-first_published_at")[:50]

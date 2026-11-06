@@ -21,7 +21,7 @@ def publish_paid_release(release_id):
         raise PublicationBlocked("News index not initialized")
     body = "".join(f"<p>{escape(p)}</p>" for p in release.body_text.split("\n\n") if p.strip())
     article = index.add_child(instance=ArticlePage(
-        title=release.title, slug=article_slug(release.title, f"paid-release:{release.pk}"),
+        title=release.title, slug=article_slug(release.title, f"paid-release:{release.pk}"), live=False,
         kind="press_release", category=release.category,
         summary=release.summary, body=body, publisher_name=release.organization.name,
         ticker=release.organization.ticker, byline=release.organization.name,
