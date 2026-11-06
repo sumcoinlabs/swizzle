@@ -1,0 +1,15 @@
+[Unit]
+Description=Swizzle Editorial Schedule (Celery Beat)
+After=network.target redis-server.service
+[Service]
+Type=simple
+User=swizzle
+WorkingDirectory=/srv/swizzle/current
+EnvironmentFile=/etc/swizzle.env
+ExecStart=/srv/swizzle/venv/bin/celery -A config beat --loglevel=INFO --schedule=/srv/swizzle/current/celerybeat-schedule
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

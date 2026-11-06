@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% block title %}Sign in | {{ brand_name }}{% endblock %}
+{% block content %}<section class="container form-page section"><h1 class="page-title">Sign in</h1><form method="post" class="form-card">{% csrf_token %}{{ form.as_p }}<button class="button primary">Sign in</button></form><p>Lost your password? <a href="{% url 'accounts:recover' %}">Use a recovery code</a>.</p><p>New to the platform? <a href="{% url 'accounts:register' %}">Register</a>.</p></section>{% endblock %}

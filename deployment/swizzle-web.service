@@ -1,0 +1,18 @@
+[Unit]
+Description=Swizzle Django/Wagtail News Website
+After=network.target postgresql.service
+[Service]
+Type=simple
+User=swizzle
+Group=www-data
+WorkingDirectory=/srv/swizzle/current
+EnvironmentFile=/etc/swizzle.env
+ExecStart=/srv/swizzle/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8011 --timeout 45 config.wsgi:application
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/swizzle/current/media
+[Install]
+WantedBy=multi-user.target

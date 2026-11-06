@@ -1,0 +1,33 @@
+{% load static %}<!doctype html>
+<html lang="{{ brand_language }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="{% block meta_description %}{{ brand_tagline }}{% endblock %}">
+  <title>{% block title %}{{ brand_name }}{% endblock %}</title>
+  {% block canonical %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <style>:root{--accent:{{ brand_accent_color }};}</style>
+  <link rel="alternate" type="application/rss+xml" title="{{ brand_name }} RSS" href="{% url 'rss_all' %}">
+  {% block head_extra %}{% endblock %}
+  {% if show_ads %}<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client|urlencode }}" crossorigin="anonymous"></script>{% endif %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="topbar"><div class="container topbar-inner"><span>INDEPENDENT NEWS &amp; ANNOUNCEMENTS</span><a href="{% url 'rss_all' %}">RSS FEED</a></div></div>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/">{% if brand_logo_url %}<img src="{{ brand_logo_url }}" class="brand-logo" alt="" height="34" width="34">{% else %}<span class="brand-mark">◈</span>{% endif %}<span class="brand-name">{{ brand_name }}</span></a>
+      <nav aria-label="Main navigation">
+        <a href="/news/">Latest</a><a href="/news/?category=crypto">Crypto</a><a href="/news/?category=otc">OTC</a>
+        <a href="/news/?category=technology">Technology</a><a href="{% url 'search' %}">Search</a>
+      </nav>
+      <div class="header-actions"><a class="button ghost small" href="{% url 'publishers:dashboard' %}">Publisher portal</a></div>
+    </div>
+  </header>
+  {% if messages %}<div class="container messages" role="status">{% for message in messages %}<div class="notice">{{ message }}</div>{% endfor %}</div>{% endif %}
+  <main id="main">{% block content %}{% endblock %}</main>
+  <footer class="site-footer"><div class="container footer-inner"><div><strong>{{ brand_name }}</strong><p>Independent editorial coverage and clearly marked press releases.</p></div><div><a href="/news/">News</a><a href="{% url 'rss_editorial' %}">Editorial RSS</a><a href="{% url 'publishers:dashboard' %}">Submit a release</a></div></div><div class="container fineprint">Press releases are submitted by third parties and are not independent reporting. Publication here does not constitute regulatory filing or guaranteed newswire distribution.</div></footer>
+</body>
+</html>

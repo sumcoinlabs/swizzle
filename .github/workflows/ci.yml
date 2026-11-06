@@ -1,0 +1,59 @@
+name: Django / Wagtail Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: swizzle_test
+          POSTGRES_USER: swizzle
+          POSTGRES_PASSWORD: swizzle_test_pw
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U swizzle -d swizzle_test"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DJANGO_SECRET_KEY: ci-only-do-not-use-in-production-000000000000000000
+      DJANGO_DEBUG: 'true'
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DATABASE_URL: postgresql://swizzle:swizzle_test_pw@127.0.0.1:5432/swizzle_test
+      CELERY_BROKER_URL: redis://127.0.0.1:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements.txt
+      - name: Compile Python
+        run: python -m compileall -q config home newsroom publishers accounts billing website
+      - name: Generate application migrations on first bootstrap
+        run: python manage.py makemigrations home newsroom publishers billing accounts --noinput
+      - name: Django system check
+        run: python manage.py check
+      - name: Database migrations
+        run: python manage.py migrate --noinput
+      - name: Initialize Wagtail website
+        run: python manage.py bootstrap_site
+      - name: Run tests
+        run: python manage.py test -v 2
+      - name: Verify no accidental credentials
+        run: |
+          if git ls-files | grep -E '(^|/)(\.env|\.env\.local|id_rsa|secret\.key)$'; then
+            echo 'ERROR: Credentials present in tracked files' >&2
+            exit 1
+          fi
