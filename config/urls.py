@@ -6,6 +6,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.contrib.sitemaps.views import sitemap
 from website import views as website_views
 from website import control as website_control
+from website import ai_control as ai_control_views
 from publishers import views as publisher_views
 from website.feeds import EditorialFeed, AllArticlesFeed
 
@@ -18,6 +19,8 @@ admin.site.site_url = "/control/"
 urlpatterns = [
     path("staff/", admin.site.urls),
     path("control/", website_control.dashboard, name="control"),
+    path("control/ai/", ai_control_views.status, name="control_ai"),
+    path("control/ai/probe/", ai_control_views.probe_key, name="control_ai_probe"),
     path("control/sources/", website_control.sources, name="control_sources"),
     path("control/sources/<int:source_id>/toggle/", website_control.toggle_source, name="control_source_toggle"),
     path("control/sources/<int:source_id>/scan/", website_control.scan_source, name="control_source_scan"),

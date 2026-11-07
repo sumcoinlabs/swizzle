@@ -60,3 +60,9 @@ See [docs/NAVIGATION.md](docs/NAVIGATION.md). Staff work begins at `/control/`, 
 The daily `/control/` dashboard now links to dedicated staff workspaces for feed monitoring, source leads, company verification, and PR approval. These are distinct from `/publisher/` customer accounts. Editing rich stories still uses Wagtail `/cms/`; the low-level Django `/staff/` is for advanced maintenance.
 
 Use the staging-only `$29` simulated checkout with a separate customer account, then verify, review and deliberately publish a *clearly marked staging PR*. Real payment credentials remain empty; demo receipts are not revenue. Source-based story outlines are unpublished; Groq AI is inactive until explicitly configured. See [v0.5 workflows](docs/V05_WORKFLOWS.md).
+
+## Swizzle v0.6 — DigiByte research engine integration
+
+This edition imports pinned, user-owned **DigiByte Newsroom v0.6** research modules (`ai_writer`, `editorial`, `newsroom_v06`, `artwork_v06`) into a native Django/Wagtail adapter. Swizzle uses DGB source allowlisting, official GitHub primary evidence, topic scoring, cautious Groq JSON validation, editorial checklists and conservative per-day token reservation. It deliberately does **not** launch the DigiByte HTTP/SQLite server or reuse its private credentials, and it does **not** automatically publish AI content. See [docs/V06_AI.md](docs/V06_AI.md).
+
+Staging AI configuration uses a private, user-owned, mode-0600 key file under `/home/electrumbtc1/.swizzle-stage/private/`; never add API keys to Git, messages or scripts. The newsroom remains opt-in and always generates **unpublished** drafts for staff verification. The AI status panel is `/control/ai/`.

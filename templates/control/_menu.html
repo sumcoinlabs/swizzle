@@ -1,6 +1,7 @@
 <aside class="control-sidebar" aria-label="Staff workspaces">
   <strong>YOUR WORKSPACE</strong>
   <a {% if request.resolver_match.url_name == 'control' %}class="active"{% endif %} href="{% url 'control' %}">Overview</a>
+  <a {% if request.resolver_match.url_name == 'control_ai' %}class="active"{% endif %} href="{% url 'control_ai' %}">AI research &amp; usage</a>
   <a {% if request.resolver_match.url_name == 'control_sources' %}class="active"{% endif %} href="{% url 'control_sources' %}">Feed sources</a>
   <a {% if request.resolver_match.url_name == 'control_leads' %}class="active"{% endif %} href="{% url 'control_leads' %}">Research queue</a>
   <a href="/cms/">Story editor <span>Wagtail</span></a>

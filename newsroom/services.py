@@ -55,14 +55,37 @@ def collect_feed(source):
     made = 0
     for entry in feed.entries[:40]:
         url = str(entry.get("link", ""))[:1200]
-        if urlparse(url).scheme not in ("http", "https"):
+        url_parts = urlparse(url)
+        if (url_parts.scheme != "https" or not url_parts.hostname or
+                url_parts.username or url_parts.password or url_parts.port not in (None, 443)):
             continue
+        # Feed entries must return to the vetted publisher, not an arbitrary URL.
+        if url_parts.hostname.lower().removeprefix("www.") != parsed.hostname.lower().removeprefix("www."):
+            continue
+        # GitHub feed leads must belong to precisely the approved repository.
+        if parsed.hostname.lower() == "github.com":
+            repo = "/" + "/".join(parsed.path.strip("/").split("/")[:2]) + "/"
+            if not url_parts.path.startswith(repo):
+                continue
         headline = bleach.clean(str(entry.get("title", "")), tags=[], strip=True).strip()[:350]
-        excerpt = bleach.clean(str(entry.get("summary", "")), tags=[], strip=True).strip()[:1400]
-        if len(headline) < 12 or len(excerpt) < 40:
+        excerpt = bleach.clean(str(entry.get("summary", "") or entry.get("description", "")), tags=[], strip=True).strip()[:1400]
+        if len(headline) < 12:
             continue
+        # Official Github release entries may omit summaries: the v0.6 engine
+        # fetches bounded release notes separately before it ever calls AI.
+        if len(excerpt) < 40 and parsed.hostname.lower() != "github.com":
+            continue
+        excerpt = excerpt or "Official repository activity; inspect primary-source details before reporting."
+        import calendar
+        from datetime import datetime, timezone as dt_timezone
+        parsed_date = entry.get("published_parsed") or entry.get("updated_parsed")
+        try:
+            source_date = datetime.fromtimestamp(calendar.timegm(parsed_date), tz=dt_timezone.utc) if parsed_date else None
+        except (TypeError, ValueError, OverflowError):
+            source_date = None
         _, created = StoryCandidate.objects.get_or_create(
-            url=url, defaults={"source": source, "headline": html.unescape(headline), "excerpt": html.unescape(excerpt)},
+            url=url, defaults={"source": source, "headline": html.unescape(headline),
+                               "excerpt": html.unescape(excerpt), "source_published_at": source_date},
         )
         made += int(created)
     source.last_checked_at = timezone.now()
@@ -152,16 +175,18 @@ def run_newsroom():
             source.last_checked_at = timezone.now()
             source.save(update_fields=["last_error", "last_checked_at"])
             stats["errors"] += 1
-    if settings.GROQ_API_KEY:
-        candidates = StoryCandidate.objects.filter(status="queued").select_related("source").order_by("created_at")[:settings.NEWSROOM_ITEMS_PER_RUN]
+    # Monitoring stays free. Groq calls are opt-in, even if a key is configured.
+    if settings.GROQ_API_KEY and settings.NEWSROOM_AUTO_DRAFT and settings.NEWSROOM_ITEMS_PER_RUN > 0:
+        from .research_v06 import research_and_draft, auto_candidate_eligible
+        candidates = StoryCandidate.objects.filter(status="queued", source__is_active=True).select_related("source").order_by("-created_at")[:settings.NEWSROOM_ITEMS_PER_RUN]
         for candidate in candidates:
+            if not auto_candidate_eligible(candidate):
+                continue
             try:
-                draft_candidate(candidate)
+                research_and_draft(candidate, actor="auto")
                 stats["drafted"] += 1
-            except Exception as exc:
-                logger.exception("Failed drafting candidate id=%s", candidate.pk)
-                candidate.error = str(exc)[:900]
-                candidate.save(update_fields=["error"])
+            except Exception:
+                logger.exception("Failed safe research drafting candidate id=%s", candidate.pk)
                 stats["errors"] += 1
     return stats
 

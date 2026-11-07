@@ -49,6 +49,31 @@ class ArticlePage(Page):
     def is_sponsored(self):
         return self.kind == "press_release"
 
+class ResearchAttempt(models.Model):
+    """Conservative per-day Groq reservations; failed calls still consume a slot."""
+    candidate = models.ForeignKey("StoryCandidate", on_delete=models.PROTECT, related_name="ai_attempts")
+    started_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    actor = models.CharField(max_length=12, choices=(("manual", "Manual"), ("auto", "Automatic")))
+    model = models.CharField(max_length=100)
+    reserved_tokens = models.PositiveIntegerField(default=10000)
+    prompt_tokens = models.PositiveIntegerField(default=0)
+    completion_tokens = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=12, default="reserved")
+    error_code = models.CharField(max_length=80, blank=True)
+
+
+class ResearchReview(models.Model):
+    """Staff-only evidence and verification notes; never injected into public copy."""
+    candidate = models.OneToOneField("StoryCandidate", on_delete=models.PROTECT, related_name="research_review")
+    evidence = models.JSONField(default=dict)
+    verification = models.JSONField(default=list)
+    quality_flags = models.JSONField(default=list)
+    topic = models.CharField(max_length=80, blank=True)
+    priority = models.PositiveSmallIntegerField(default=0)
+    model = models.CharField(max_length=100, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class FeedSource(models.Model):
     name = models.CharField(max_length=180)
     url = models.URLField(unique=True)
@@ -70,6 +95,7 @@ class StoryCandidate(models.Model):
     status = models.CharField(max_length=16, choices=STATUS, default="queued", db_index=True)
     article = models.OneToOneField(ArticlePage, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    source_published_at = models.DateTimeField(null=True, blank=True, help_text="Original feed's stated date; never the Swizzle publication date")
     error = models.TextField(blank=True)
 
     def __str__(self):

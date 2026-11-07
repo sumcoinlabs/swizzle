@@ -5,7 +5,7 @@
  <div class="control-top"><div><div class="eyebrow dark">EDITORIAL • RESEARCH</div><h1>Research queue</h1><p>Source leads are not finished reporting. Draft an outline or an AI brief, then review the story in Wagtail.</p></div><a class="button ghost" href="{% url 'control_sources' %}">Monitor feeds</a></div>
  <div class="control-layout">{% include "control/_menu.html" %}
   <div class="control-main">
-   <div class="control-callout"><div><strong>Editorial safety is on</strong><p>Outlines and AI briefs are saved <b>unpublished</b>. They will not appear in news, RSS, or search until manually reviewed and published.</p></div><a class="button primary" href="/cms/">Open story editor</a></div>
+   <div class="control-callout"><div><strong>Editorial safety is on</strong><p>Outlines and AI briefs are saved <b>unpublished</b>. They will not appear in news, RSS, or search until manually reviewed and published.</p></div><a class="button primary" href="{% url 'control_ai' %}">AI status &amp; usage</a></div>
    <div class="staff-list">
    {% for lead in leads %}
     <article class="staff-entry"><div class="staff-entry-main"><div class="staff-entry-title">{{ lead.headline }} <span class="pill pending">{{ lead.get_status_display }}</span></div>

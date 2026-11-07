@@ -94,14 +94,16 @@ def outline_lead(request, lead_id):
 @staff
 @require_POST
 def ai_draft_lead(request, lead_id):
-    from newsroom.services import draft_candidate, NewsroomError
+    from newsroom.research_v06 import research_and_draft, ResearchBlocked
     candidate = get_object_or_404(StoryCandidate, pk=lead_id)
     if not settings.GROQ_API_KEY:
         messages.error(request, "Groq is not configured; prepare a research outline instead.")
     else:
         try:
-            draft_candidate(candidate)
-            messages.success(request, "AI-assisted unpublished draft created; verify evidence in Story Editor.")
+            research_and_draft(candidate, actor="manual")
+            messages.success(request, "DGB v0.6-based AI draft saved UNPUBLISHED with private verification notes. Review it in Story Editor.")
+        except ResearchBlocked as exc:
+            messages.error(request, str(exc))
         except Exception as exc:
             messages.error(request, f"AI drafting unavailable: {type(exc).__name__}. Check source and private server logs.")
     return redirect("control_leads")

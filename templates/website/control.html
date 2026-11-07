@@ -6,7 +6,7 @@
   <div class="control-layout">
     {% include "control/_menu.html" %}
     <div class="control-main">
-      <div class="control-callout"><div><strong>What to do first</strong><p>Review source feeds and research leads, create editorial stories in Wagtail, and approve verified companies and paid releases. AI publishing and real payments remain off in staging.</p></div><a class="button primary" href="/cms/">Open story editor</a></div>
+      <div class="control-callout"><div><strong>What to do first</strong><p>Review source feeds and research leads, create editorial stories in Wagtail, and approve verified companies and paid releases. AI publishing and real payments remain off in staging.</p></div><a class="button primary" href="{% url 'control_ai' %}">AI research setup</a></div>
       <div class="control-stats">
         <a href="/cms/"><span>Published articles</span><strong>{{ published_count }}</strong><small>Publicly visible</small></a>
         <a href="/cms/"><span>Unpublished articles</span><strong>{{ draft_count }}</strong><small>Editorial work</small></a>

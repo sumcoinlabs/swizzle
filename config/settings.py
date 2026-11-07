@@ -110,8 +110,33 @@ NEWSROOM_AUTO_PUBLISH = flag("NEWSROOM_AUTO_PUBLISH")
 STAGING_DEMO_PAYMENTS = DEBUG and flag("STAGING_DEMO_PAYMENTS")
 NEWSROOM_ITEMS_PER_RUN = int(os.getenv("NEWSROOM_ITEMS_PER_RUN", "10"))
 AI_PROVIDER = os.getenv("AI_PROVIDER", "groq")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+# Credentials are read from a user-owned, mode 0600 file on the staging host.
+# Never copy a key from DigiByte's production installation.
+def _groq_key():
+    key = os.getenv("GROQ_API_KEY", "").strip()
+    path = os.getenv("GROQ_API_KEY_FILE", "").strip()
+    if path:
+        from pathlib import Path as _Path
+        keyfile = _Path(path)
+        if not keyfile.is_absolute() or keyfile.is_symlink() or not keyfile.is_file():
+            return ""
+        info = keyfile.stat()
+        if (info.st_mode & 0o077) or (hasattr(os, "getuid") and info.st_uid != os.getuid()):
+            raise RuntimeError("Groq key file must be owned by the application user, mode 0600")
+        key = keyfile.read_text(encoding="utf-8").strip()
+    if key and (not key.startswith("gsk_") or len(key) < 24):
+        raise RuntimeError("Invalid Groq API key format")
+    return key
+
+GROQ_API_KEY = _groq_key()
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+# DGB v0.6-style conservative reservation limits. No automatic paid fallback.
+NEWSROOM_AI_DAILY_REQUEST_LIMIT = 8
+NEWSROOM_AI_AUTO_DAILY_LIMIT = 2
+NEWSROOM_AI_DAILY_RESERVED_TOKEN_LIMIT = 50000
+NEWSROOM_AI_RESERVED_TOKENS_PER_ATTEMPT = 10000
+NEWSROOM_AUTO_DRAFT = flag("NEWSROOM_AUTO_DRAFT", "false") and bool(GROQ_API_KEY)
+
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_READER_MONTHLY_PRICE_ID = os.getenv("STRIPE_READER_MONTHLY_PRICE_ID", "")

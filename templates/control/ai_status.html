@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}AI Research | {{ brand_name }}{% endblock %}
+{% block content %}
+<section class="control-shell container">
+<div class="control-top"><div><div class="eyebrow dark">EDITORIAL • AI RESEARCH</div><h1>AI research operations</h1><p>DigiByte v0.6 source verification and editorial safeguards, adapted for Swizzle.</p></div><a class="button ghost" href="{% url 'control_leads' %}">Review leads</a></div>
+<div class="control-layout">{% include "control/_menu.html" %}<div class="control-main">
+<div class="control-callout"><div><strong>{% if ai_ready %}Groq key configured{% else %}Groq key not configured{% endif %}</strong><p>Model: {{ ai_model }}. Research requires explicit staff selection and primary-source evidence. All AI drafts remain unpublished until reviewed.</p></div>
+{% if ai_ready %}<form method="post" action="{% url 'control_ai_probe' %}">{% csrf_token %}<button class="button primary" type="submit">Verify API connection</button></form>{% endif %}</div>
+<div class="control-stats"><div class="dashboard-card"><span>Daily attempts</span><strong>{{ daily_calls }} / {{ daily_limit }}</strong><small>Failed requests count</small></div><div class="dashboard-card"><span>Reserved tokens today</span><strong>{{ daily_tokens }} / {{ token_limit }}</strong><small>Conservative quota</small></div><div class="dashboard-card"><span>Auto drafts</span><strong>{% if auto_draft %}ON{% else %}OFF{% endif %}</strong><small>Not automatic public publishing</small></div></div>
+<h2>Recent AI attempts</h2><div class="staff-list">{% for item in recent_attempts %}<div class="staff-entry"><div class="staff-entry-main"><strong>{{ item.candidate.headline|truncatechars:85 }}</strong><p>{{ item.status }} • {{ item.actor }} • {{ item.model }} • {{ item.started_at|date:'M j H:i' }} UTC</p></div><div class="staff-muted">{{ item.prompt_tokens }} input + {{ item.completion_tokens }} output tokens</div></div>{% empty %}<p>No AI requests made yet.</p>{% endfor %}</div>
+<h2>Staff-only verification checklists</h2><div class="staff-list">{% for review in recent_reviews %}<div class="staff-entry staff-entry-column"><strong>{{ review.candidate.headline }}</strong><p>{{ review.topic }} • priority {{ review.priority }} • {{ review.model }}</p><details><summary>Review evidence and AI verification flags</summary><ul>{% for item in review.verification %}<li>{{ item }}</li>{% endfor %}{% for item in review.quality_flags %}<li>{{ item }}</li>{% endfor %}</ul></details></div>{% empty %}<p>No completed AI research yet.</p>{% endfor %}</div>
+<p class="small-note">Source material is untrusted. The quality checklist cannot independently verify claims. No public auto-publishing; user-triggered research only until configured otherwise.</p>
+</div></div></section>
+{% endblock %}
