@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Research Queue | {{ brand_name }}{% endblock %}
+{% block content %}
+<section class="control-shell container">
+ <div class="control-top"><div><div class="eyebrow dark">EDITORIAL • RESEARCH</div><h1>Research queue</h1><p>Source leads are not finished reporting. Draft an outline or an AI brief, then review the story in Wagtail.</p></div><a class="button ghost" href="{% url 'control_sources' %}">Monitor feeds</a></div>
+ <div class="control-layout">{% include "control/_menu.html" %}
+  <div class="control-main">
+   <div class="control-callout"><div><strong>Editorial safety is on</strong><p>Outlines and AI briefs are saved <b>unpublished</b>. They will not appear in news, RSS, or search until manually reviewed and published.</p></div><a class="button primary" href="/cms/">Open story editor</a></div>
+   <div class="staff-list">
+   {% for lead in leads %}
+    <article class="staff-entry"><div class="staff-entry-main"><div class="staff-entry-title">{{ lead.headline }} <span class="pill pending">{{ lead.get_status_display }}</span></div>
+      <p>{{ lead.excerpt|truncatechars:240 }}</p><small>{{ lead.source.name }} • <a href="{{ lead.url }}" rel="noopener noreferrer" target="_blank">Read source</a></small>
+      {% if lead.error %}<p class="text-error">Review note: {{ lead.error|truncatechars:240 }}</p>{% endif %}
+    </div><div class="staff-actions">
+       {% if lead.article_id %}<a class="button ghost small" href="/cms/pages/{{ lead.article_id }}/edit/">Edit draft</a>
+       {% elif lead.status == 'queued' %}
+         <form method="post" action="{% url 'control_lead_outline' lead.pk %}">{% csrf_token %}<button class="button primary small" type="submit">Make outline</button></form>
+         {% if ai_ready %}<form method="post" action="{% url 'control_lead_ai' lead.pk %}">{% csrf_token %}<button class="button ghost small" type="submit">AI draft</button></form>{% endif %}
+       {% endif %}
+    </div></article>
+   {% empty %}<div class="control-empty"><strong>No research leads yet</strong><p><a href="{% url 'control_sources' %}">Enable and scan a source</a> to start collecting real headlines.</p></div>{% endfor %}
+   </div>
+  </div>
+ </div>
+</section>
+{% endblock %}

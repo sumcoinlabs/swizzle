@@ -29,6 +29,7 @@ class PressRelease(models.Model):
     ai_review_notes = models.TextField(blank=True)
     ai_suggested_title = models.CharField(max_length=240, blank=True)
     payment_received_at = models.DateTimeField(null=True, blank=True)
+    is_test_payment = models.BooleanField(default=False, help_text="Staging-only simulated checkout; never real revenue")
     published_page = models.OneToOneField("newsroom.ArticlePage", null=True, blank=True,
                                           on_delete=models.SET_NULL, related_name="paid_release")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,5 +40,11 @@ class PressRelease(models.Model):
         return self.title
 
     @property
+    def can_publish_after_approval(self):
+        from django.conf import settings
+        return bool(self.payment_received_at and (not self.is_test_payment or
+                    (settings.DEBUG and settings.STAGING_DEMO_PAYMENTS)))
+
+    @property
     def can_publish(self):
-        return bool(self.payment_received_at and self.organization.is_verified and self.status == "approved")
+        return bool(self.organization.is_verified and self.status == "approved" and self.can_publish_after_approval)

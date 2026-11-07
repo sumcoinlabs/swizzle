@@ -164,3 +164,44 @@ def run_newsroom():
                 candidate.save(update_fields=["error"])
                 stats["errors"] += 1
     return stats
+
+
+def prepare_candidate_outline(candidate):
+    """Create a private, clearly marked, source-based working outline without AI.
+
+    This intentionally does NOT invent reporting or publish any article. Staff
+    must replace notes with independently checked journalism before publication.
+    """
+    from django.utils.html import escape
+    candidate = StoryCandidate.objects.select_related("source").get(pk=candidate.pk)
+    if candidate.status != "queued" or candidate.article_id:
+        raise NewsroomError("Only queued, not-yet-drafted leads can be outlined")
+    if not candidate.url.startswith("https://"):
+        raise NewsroomError("Lead needs an HTTPS source URL")
+    index = NewsIndexPage.objects.first()
+    if not index:
+        raise NewsroomError("News index not initialized")
+    summary = candidate.excerpt.strip()[:570] or "Staff research required: source content has not been verified."
+    body = (
+        "<p><strong>UNPUBLISHED RESEARCH NOTES — NOT A FINISHED NEWS ARTICLE.</strong></p>"
+        "<p>Source headline: " + escape(candidate.headline[:350]) + "</p>"
+        "<p>Source excerpt (unverified): " + escape(candidate.excerpt[:950]) + "</p>"
+        "<p>Before publishing: read the primary evidence, check names and dates, "
+        "write original reporting, confirm attribution and remove these working notes.</p>"
+    )
+    with transaction.atomic():
+        candidate = StoryCandidate.objects.select_for_update().get(pk=candidate.pk)
+        if candidate.status != "queued" or candidate.article_id:
+            raise NewsroomError("Lead already drafted")
+        page = index.add_child(instance=ArticlePage(
+            title=candidate.headline[:240], slug=article_slug(candidate.headline, candidate.url),
+            live=False, kind="editorial", category=candidate.source.category,
+            summary=summary, body=body, source_url=candidate.url,
+            source_name=candidate.source.name, ai_assisted=False,
+            byline="Editorial team — working outline",
+        ))
+        page.save_revision()
+        candidate.status = "draft"
+        candidate.article = page
+        candidate.save(update_fields=["status", "article"])
+    return page

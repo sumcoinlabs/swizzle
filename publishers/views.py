@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from .decorators import customer_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -8,14 +8,14 @@ from .forms import OrganizationForm, PressReleaseForm
 from .models import Organization, PressRelease
 from website.turnstile import turnstile_passes
 
-@login_required
+@customer_required
 @require_http_methods(["GET"])
 def dashboard(request):
     organizations = Organization.objects.filter(owner=request.user).order_by("name")
     releases = PressRelease.objects.filter(organization__owner=request.user).select_related("organization").order_by("-created_at")
     return render(request, "publishers/dashboard.html", {"organizations": organizations, "releases": releases})
 
-@login_required
+@customer_required
 @require_http_methods(["GET", "POST"])
 def create_organization(request):
     form = OrganizationForm(request.POST or None)
@@ -30,7 +30,7 @@ def create_organization(request):
             return redirect("publishers:dashboard")
     return render(request, "publishers/create_organization.html", {"form": form})
 
-@login_required
+@customer_required
 @require_http_methods(["GET", "POST"])
 def submit_release(request, organization_id):
     org = get_object_or_404(Organization, pk=organization_id, owner=request.user)

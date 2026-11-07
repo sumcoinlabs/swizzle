@@ -1,7 +1,7 @@
 import stripe
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from publishers.decorators import customer_required
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from publishers.models import PressRelease
 from .services import checkout_reader, checkout_release, reader_billing_portal, handle_verified_webhook, BillingError
 
-@login_required
+@customer_required
 @require_POST
 def pay_release(request, release_id):
     release = get_object_or_404(PressRelease, id=release_id, organization__owner=request.user)
@@ -21,7 +21,7 @@ def pay_release(request, release_id):
     from django.http import HttpResponseRedirect
     return HttpResponseRedirect(url)
 
-@login_required
+@customer_required
 @require_POST
 def subscribe_reader(request):
     try:
@@ -32,7 +32,7 @@ def subscribe_reader(request):
     from django.http import HttpResponseRedirect
     return HttpResponseRedirect(url)
 
-@login_required
+@customer_required
 @require_POST
 def manage_reader(request):
     try:

@@ -53,3 +53,10 @@ Project-specific original code: MIT. Third-party dependencies retain their own l
 ## User-facing routes
 
 See [docs/NAVIGATION.md](docs/NAVIGATION.md). Staff work begins at `/control/`, editorial articles are authored in `/cms/`, and publishers use `/publisher/`. `/staff/` is advanced Django administration, not the normal dashboard.
+
+
+## v0.5 — Staff operations and isolated demo payments
+
+The daily `/control/` dashboard now links to dedicated staff workspaces for feed monitoring, source leads, company verification, and PR approval. These are distinct from `/publisher/` customer accounts. Editing rich stories still uses Wagtail `/cms/`; the low-level Django `/staff/` is for advanced maintenance.
+
+Use the staging-only `$29` simulated checkout with a separate customer account, then verify, review and deliberately publish a *clearly marked staging PR*. Real payment credentials remain empty; demo receipts are not revenue. Source-based story outlines are unpublished; Groq AI is inactive until explicitly configured. See [v0.5 workflows](docs/V05_WORKFLOWS.md).

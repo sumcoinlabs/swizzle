@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Press Release Desk | {{ brand_name }}{% endblock %}
+{% block content %}
+<section class="control-shell container">
+ <div class="control-top"><div><div class="eyebrow dark">PUBLISHERS • EDITORIAL REVIEW</div><h1>Press release desk</h1><p>Check identity, payment and content before publishing a clearly labeled corporate announcement.</p></div><a class="button ghost" href="{% url 'control_companies' %}">Company verification</a></div>
+ <div class="control-layout">{% include "control/_menu.html" %}
+  <div class="control-main">
+   {% if demo_mode %}<div class="demo-warning"><strong>Staging demonstration only — no money is collected.</strong><p>Simulated ${{ release_price_display }} payments are marked as tests and cannot authorize publication with production settings. Do not migrate this staging database to production.</p></div>{% endif %}
+   <div class="staff-list">
+    {% for rel in releases %}
+    <article class="staff-entry staff-entry-column"><div class="staff-entry-main"><div class="staff-entry-title">{{ rel.title }} <span class="pill {% if rel.status == 'published' %}success{% else %}pending{% endif %}">{{ rel.get_status_display }}</span></div>
+     <p>{{ rel.summary }}</p><div class="staff-muted">Company: <strong>{{ rel.organization.name }}</strong> {% if rel.organization.is_verified %}<span class="pill success">Verified</span>{% else %}<span class="pill pending">Unverified</span>{% endif %} • Customer: {{ rel.organization.owner.username }}</div>
+     <p><strong>Payment:</strong> {% if rel.is_test_payment %}<span class="pill pending">SIMULATED — NOT CHARGED</span>{% elif rel.payment_received_at %}<span class="pill success">Stripe paid</span>{% else %}Unpaid{% endif %}</p>
+     <details class="staff-details"><summary>Read full submitted press release</summary><div class="press-body">{{ rel.body_text|linebreaks }}</div></details>
+     {% if rel.ai_review_notes %}<details class="staff-details"><summary>AI preflight warnings</summary><div class="press-body">{{ rel.ai_review_notes|linebreaks }}</div></details>{% endif %}
+     {% if rel.editorial_notes %}<p class="staff-muted">Editor notes: {{ rel.editorial_notes|truncatechars:300 }}</p>{% endif %}
+    </div><div class="staff-actions">
+     {% if rel.published_page_id %}<a class="button ghost small" href="{{ rel.published_page.url }}">View published announcement</a>
+     {% elif rel.status == 'submitted' %}
+       {% if demo_mode and not rel.payment_received_at %}<form method="post" action="{% url 'control_release_demo_payment' rel.pk %}">{% csrf_token %}<input type="hidden" name="confirm" value="SIMULATE"><button class="button ghost small" type="submit">Simulate ${{ release_price_display }} payment</button></form>{% endif %}
+       {% if ai_ready %}<form method="post" action="{% url 'control_release_ai' rel.pk %}">{% csrf_token %}<button class="button ghost small" type="submit">AI preflight</button></form>{% endif %}
+       {% if rel.organization.is_verified and rel.payment_received_at %}<form class="staff-review-form" method="post" action="{% url 'control_release_approve' rel.pk %}">{% csrf_token %}<label>Review notes <input name="notes" maxlength="3000" placeholder="Editorial decision notes"></label><label class="inline-check"><input type="checkbox" name="editor_reviewed" value="yes" required> I reviewed the claims and approve publication</label><button class="button primary small" type="submit">Approve release</button></form>{% endif %}
+     {% elif rel.status == 'approved' %}<form method="post" action="{% url 'control_release_publish' rel.pk %}">{% csrf_token %}<button class="button primary small" type="submit">Publish labeled release</button></form>{% endif %}
+    </div></article>
+    {% empty %}<div class="control-empty"><strong>No submitted releases yet</strong><p>Use an incognito window to create a publisher account, add a company, and submit a test announcement. It will appear here.</p></div>{% endfor %}
+   </div>
+  </div>
+ </div>
+</section>
+{% endblock %}

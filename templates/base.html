@@ -31,12 +31,16 @@
         {% if request.user.is_authenticated %}
           {% if request.user.is_staff %}<a class="button ghost small" href="{% url 'control' %}">Control Center</a>{% else %}<a class="button ghost small" href="{% url 'publishers:dashboard' %}">My account</a>{% endif %}
         {% else %}<a class="header-login" href="{% url 'accounts:login' %}">Log in</a>{% endif %}
-        <a class="button primary small" href="{% url 'publishers:dashboard' %}">Publish a release</a>
+        {% if request.user.is_authenticated and request.user.is_staff %}
+          <span class="staff-identity">Staff session</span>
+        {% else %}
+          <a class="button primary small" href="{% url 'publishers:dashboard' %}">Publish a release</a>
+        {% endif %}
       </div>
     </div>
   </header>
   {% if messages %}<div class="container messages" role="status">{% for message in messages %}<div class="notice">{{ message }}</div>{% endfor %}</div>{% endif %}
   <main id="main">{% block content %}{% endblock %}</main>
-  <footer class="site-footer"><div class="container footer-inner"><div><strong>{{ brand_name }}</strong><p>Independent editorial coverage and clearly marked paid announcements.</p></div><div><a href="/news/">Latest news</a><a href="{% url 'rss_editorial' %}">Editorial RSS</a><a href="{% url 'publishers:dashboard' %}">Publish a release</a>{% if request.user.is_authenticated and request.user.is_staff %}<a href="{% url 'control' %}">Staff workspace</a>{% endif %}</div></div><div class="container fineprint">Press releases are submitted by third parties and are not independent reporting. Publication here does not constitute a regulatory filing or guaranteed newswire distribution.</div></footer>
+  <footer class="site-footer"><div class="container footer-inner"><div><strong>{{ brand_name }}</strong><p>Independent editorial coverage and clearly marked paid announcements.</p></div><div><a href="/news/">Latest news</a><a href="{% url 'rss_editorial' %}">Editorial RSS</a>{% if request.user.is_authenticated and request.user.is_staff %}<a href="{% url 'control' %}">Staff workspace</a>{% else %}<a href="{% url 'publishers:dashboard' %}">Publish a release</a>{% endif %}</div></div><div class="container fineprint">Press releases are submitted by third parties and are not independent reporting. Publication here does not constitute a regulatory filing or guaranteed newswire distribution.</div></footer>
 </body>
 </html>

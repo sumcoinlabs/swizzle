@@ -4,38 +4,24 @@
 <section class="control-shell container">
   <div class="control-top"><div><div class="eyebrow dark">STAFF WORKSPACE</div><h1>Newsroom Control Center</h1><p>One place to run the newsroom and the press-release business.</p></div><span class="stage-status">Internal staff access</span></div>
   <div class="control-layout">
-    <aside class="control-sidebar" aria-label="Newsroom tools">
-      <strong>WORKSPACES</strong>
-      <a class="active" href="{% url 'control' %}">Overview</a>
-      <a href="/cms/">Story editor <span>Wagtail</span></a>
-      <a href="/staff/newsroom/storycandidate/">Research queue</a>
-      <a href="/staff/newsroom/feedsource/">Feed sources</a>
-      <a href="/staff/publishers/pressrelease/">PR review</a>
-      <a href="/staff/publishers/organization/">Company approvals</a>
-      <a href="/staff/billing/paymentrecord/">Billing records</a>
-      <hr>
-      <strong>OTHER VIEWS</strong>
-      <a href="{% url 'publishers:dashboard' %}">Publisher experience</a>
-      <a href="/news/">Public newsroom</a>
-      <a href="/staff/">Advanced database admin</a>
-    </aside>
+    {% include "control/_menu.html" %}
     <div class="control-main">
       <div class="control-callout"><div><strong>What to do first</strong><p>Review source feeds and research leads, create editorial stories in Wagtail, and approve verified companies and paid releases. AI publishing and real payments remain off in staging.</p></div><a class="button primary" href="/cms/">Open story editor</a></div>
       <div class="control-stats">
         <a href="/cms/"><span>Published articles</span><strong>{{ published_count }}</strong><small>Publicly visible</small></a>
         <a href="/cms/"><span>Unpublished articles</span><strong>{{ draft_count }}</strong><small>Editorial work</small></a>
-        <a href="/staff/newsroom/storycandidate/"><span>Research leads</span><strong>{{ story_count }}</strong><small>Queued or drafted</small></a>
-        <a href="/staff/publishers/pressrelease/"><span>PR review queue</span><strong>{{ release_count }}</strong><small>Awaiting action</small></a>
+        <a href="{% url 'control_leads' %}"><span>Research leads</span><strong>{{ story_count }}</strong><small>Queued or drafted</small></a>
+        <a href="{% url 'control_releases' %}"><span>PR review queue</span><strong>{{ release_count }}</strong><small>Awaiting action</small></a>
       </div>
       <div class="control-panels">
-        <section class="control-panel"><header><div><h2>Research queue</h2><p>Potential stories from monitored feeds</p></div><a href="/staff/newsroom/storycandidate/">Manage</a></header>
-        {% for item in story_queue %}<div class="control-item"><div><strong>{{ item.headline|truncatechars:86 }}</strong><small>{{ item.source.name }} · {{ item.get_status_display }}</small></div><a href="/staff/newsroom/storycandidate/{{ item.pk }}/change/">Inspect</a></div>{% empty %}<div class="control-empty"><strong>No research leads yet</strong><p>{{ active_feed_count }} of {{ feed_count }} feeds active. Source monitoring has not been enabled in this staging installation.</p><a href="/staff/newsroom/feedsource/">Review sources</a></div>{% endfor %}</section>
-        <section class="control-panel"><header><div><h2>Press release review</h2><p>Company submissions and editorial approvals</p></div><a href="/staff/publishers/pressrelease/">Manage</a></header>
-        {% for item in release_queue %}<div class="control-item"><div><strong>{{ item.title|truncatechars:82 }}</strong><small>{{ item.organization.name }} · {{ item.get_status_display }}</small></div><a href="/staff/publishers/pressrelease/{{ item.pk }}/change/">Inspect</a></div>{% empty %}<div class="control-empty"><strong>No releases awaiting review</strong><p>Submitted announcements will appear here after publishers send them.</p><a href="{% url 'publishers:dashboard' %}">Preview publisher flow</a></div>{% endfor %}</section>
+        <section class="control-panel"><header><div><h2>Research queue</h2><p>Potential stories from monitored feeds</p></div><a href="{% url 'control_leads' %}">Manage</a></header>
+        {% for item in story_queue %}<div class="control-item"><div><strong>{{ item.headline|truncatechars:86 }}</strong><small>{{ item.source.name }} · {{ item.get_status_display }}</small></div><a href="{% url 'control_leads' %}">Inspect</a></div>{% empty %}<div class="control-empty"><strong>No research leads yet</strong><p>{{ active_feed_count }} of {{ feed_count }} feeds active. Source monitoring has not been enabled in this staging installation.</p><a href="{% url 'control_sources' %}">Review sources</a></div>{% endfor %}</section>
+        <section class="control-panel"><header><div><h2>Press release review</h2><p>Company submissions and editorial approvals</p></div><a href="{% url 'control_releases' %}">Manage</a></header>
+        {% for item in release_queue %}<div class="control-item"><div><strong>{{ item.title|truncatechars:82 }}</strong><small>{{ item.organization.name }} · {{ item.get_status_display }}</small></div><a href="{% url 'control_releases' %}">Inspect</a></div>{% empty %}<div class="control-empty"><strong>No releases awaiting review</strong><p>Submitted announcements will appear here after publishers send them.</p><a href="{% url 'control_releases' %}">Open PR desk</a></div>{% endfor %}</section>
       </div>
       <div class="control-tools">
-        <a href="/staff/publishers/organization/"><span>Company verification</span><strong>{{ company_count }} awaiting review</strong></a>
-        <a href="/staff/newsroom/feedsource/"><span>News feeds</span><strong>{{ active_feed_count }} active / {{ feed_count }} imported</strong></a>
+        <a href="{% url 'control_companies' %}"><span>Company verification</span><strong>{{ company_count }} awaiting review</strong></a>
+        <a href="{% url 'control_sources' %}"><span>News feeds</span><strong>{{ active_feed_count }} active / {{ feed_count }} imported</strong></a>
         <a href="/staff/billing/paymentrecord/"><span>Billing</span><strong>{{ payment_count }} recorded payments</strong></a>
       </div>
       <p class="control-footnote">The Wagtail editor and advanced Django administration are still available when needed, but this is your daily starting point. No automated publishing or payment collection is enabled in staging.</p>

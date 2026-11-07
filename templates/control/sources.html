@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Feed Sources | {{ brand_name }}{% endblock %}
+{% block content %}
+<section class="control-shell container">
+ <div class="control-top"><div><div class="eyebrow dark">EDITORIAL • SOURCES</div><h1>News monitoring</h1><p>Choose trusted sources, then scan one at a time. All reporting stays unpublished until you approve it.</p></div><span class="stage-status">{{ active_count }} sources active • automatic publishing off</span></div>
+ <div class="control-layout">{% include "control/_menu.html" %}
+  <div class="control-main">
+   <div class="control-callout"><div><strong>Start with official feeds</strong><p>Activate one or two verified project release feeds. Select <b>Scan now</b>, then open the Research Queue. Don't activate unknown websites until you've checked them.</p></div><a class="button primary" href="{% url 'control_leads' %}">Research queue</a></div>
+   <div class="staff-list">
+    {% for src in sources %}
+    <article class="staff-entry"><div class="staff-entry-main"><div class="staff-entry-title">{{ src.name }} <span class="pill {% if src.is_active %}success{% else %}pending{% endif %}">{% if src.is_active %}Monitoring on{% else %}Paused{% endif %}</span></div><p><a href="{{ src.url }}" target="_blank" rel="noopener noreferrer">{{ src.url|truncatechars:92 }}</a></p>
+    {% if src.last_checked_at %}<small>Last scan {{ src.last_checked_at|date:"M j, H:i" }} UTC</small>{% else %}<small>Not yet scanned</small>{% endif %}
+    {% if src.last_error %}<p class="text-error">Last error: {{ src.last_error|truncatechars:220 }}</p>{% endif %}</div>
+    <div class="staff-actions"><form method="post" action="{% url 'control_source_toggle' src.pk %}">{% csrf_token %}<button class="button ghost small" type="submit">{% if src.is_active %}Pause{% else %}Enable{% endif %}</button></form>
+    {% if src.is_active %}<form method="post" action="{% url 'control_source_scan' src.pk %}">{% csrf_token %}<button class="button primary small" type="submit">Scan now</button></form>{% endif %}</div></article>
+    {% empty %}<div class="control-empty">No sources imported.</div>{% endfor %}
+   </div>
+  </div>
+ </div>
+</section>
+{% endblock %}

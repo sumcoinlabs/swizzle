@@ -10,7 +10,7 @@ from website.turnstile import turnstile_passes
 @require_http_methods(["GET", "POST"])
 def register(request):
     if request.user.is_authenticated:
-        return redirect("publishers:dashboard")
+        return redirect("control" if request.user.is_staff else "publishers:dashboard")
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         if not turnstile_passes(request):
@@ -45,6 +45,13 @@ def reset_with_recovery_code(request):
                     user.set_password(form.cleaned_data["password1"])
                     user.save(update_fields=["password"])
                     login(request, user)
-                    return redirect("publishers:dashboard")
+                    return redirect("control" if request.user.is_staff else "publishers:dashboard")
                 form.add_error(None, "Invalid username or recovery code")
     return render(request, "accounts/recovery.html", {"form": form})
+
+
+@require_http_methods(["GET"])
+def account_home(request):
+    if not request.user.is_authenticated:
+        return redirect("accounts:login")
+    return redirect("control" if request.user.is_staff else "publishers:dashboard")

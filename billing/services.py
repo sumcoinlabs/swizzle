@@ -17,6 +17,8 @@ def require_stripe():
 
 def checkout_release(request, release):
     require_stripe()
+    if release.is_test_payment:
+        raise BillingError("Simulated staging payments cannot enter real checkout")
     if release.payment_received_at:
         raise BillingError("Already paid")
     if release.status not in ("submitted", "approved"):

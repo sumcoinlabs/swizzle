@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Company Review | {{ brand_name }}{% endblock %}
+{% block content %}
+<section class="control-shell container">
+ <div class="control-top"><div><div class="eyebrow dark">PUBLISHERS • VERIFICATION</div><h1>Company approvals</h1><p>Review each customer's authority to publish on behalf of a company or project.</p></div></div>
+ <div class="control-layout">{% include "control/_menu.html" %}
+  <div class="control-main">
+   <div class="control-callout"><div><strong>Verification is a human decision</strong><p>Confirm the company exists, the contact is authorized, and the ticker is accurate. A typed claim alone isn't verification.</p></div></div>
+   <div class="staff-list">{% for org in companies %}
+    <article class="staff-entry"><div class="staff-entry-main"><div class="staff-entry-title">{{ org.name }} <span class="pill {% if org.is_verified %}success{% else %}pending{% endif %}">{% if org.is_verified %}Verified{% else %}Pending{% endif %}</span></div>
+       <p>{% if org.ticker %}Ticker: {{ org.ticker }} • {% endif %}Customer: {{ org.owner.username }} • Contact: {{ org.contact_name }}{% if org.contact_role %} ({{ org.contact_role }}){% endif %}</p>
+       {% if org.website %}<small><a href="{{ org.website }}" rel="noopener noreferrer" target="_blank">{{ org.website }}</a></small>{% endif %}
+       {% if org.jurisdiction %}<small> • Jurisdiction: {{ org.jurisdiction }}</small>{% endif %}
+       {% if org.verification_notes %}<p class="staff-muted">Review notes: {{ org.verification_notes|truncatechars:350 }}</p>{% endif %}</div>
+       {% if not org.is_verified %}<form class="staff-review-form" method="post" action="{% url 'control_company_verify' org.pk %}">{% csrf_token %}<label>Verification notes <textarea name="verification_notes" rows="2" minlength="12" maxlength="3000" required placeholder="What identity and authorization evidence was checked?"></textarea></label>
+       <label class="inline-check"><input type="checkbox" name="verified" value="yes" required> I independently verified identity and authority</label>
+       <button class="button primary small" type="submit">Verify company</button></form>{% endif %}
+    </article>
+   {% empty %}<div class="control-empty"><strong>No companies yet</strong><p>Register a separate publisher test account in an incognito window to submit a profile.</p></div>{% endfor %}</div>
+  </div>
+ </div>
+</section>
+{% endblock %}

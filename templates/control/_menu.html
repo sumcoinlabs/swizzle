@@ -1,0 +1,14 @@
+<aside class="control-sidebar" aria-label="Staff workspaces">
+  <strong>YOUR WORKSPACE</strong>
+  <a {% if request.resolver_match.url_name == 'control' %}class="active"{% endif %} href="{% url 'control' %}">Overview</a>
+  <a {% if request.resolver_match.url_name == 'control_sources' %}class="active"{% endif %} href="{% url 'control_sources' %}">Feed sources</a>
+  <a {% if request.resolver_match.url_name == 'control_leads' %}class="active"{% endif %} href="{% url 'control_leads' %}">Research queue</a>
+  <a href="/cms/">Story editor <span>Wagtail</span></a>
+  <a {% if request.resolver_match.url_name == 'control_companies' %}class="active"{% endif %} href="{% url 'control_companies' %}">Company verification</a>
+  <a {% if request.resolver_match.url_name == 'control_releases' %}class="active"{% endif %} href="{% url 'control_releases' %}">Press release desk</a>
+  <hr>
+  <strong>OTHER VIEWS</strong>
+  <a href="/news/">Public newsroom</a>
+  <a href="/staff/">Advanced Django admin</a>
+  <span class="preview-guidance">To try the customer portal, open a private browser window and register a separate publisher account.</span>
+</aside>

@@ -71,7 +71,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 LOGIN_URL = "accounts:login"
-LOGIN_REDIRECT_URL = "publishers:dashboard"
+LOGIN_REDIRECT_URL = "accounts:home"
 LOGOUT_REDIRECT_URL = "/"
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
@@ -106,6 +106,8 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/1")
 CELERY_TASK_IGNORE_RESULT = True
 NEWSROOM_AUTO_PUBLISH = flag("NEWSROOM_AUTO_PUBLISH")
+# NEVER enable simulated payment outside DEBUG staging. No test charge is a real Stripe payment.
+STAGING_DEMO_PAYMENTS = DEBUG and flag("STAGING_DEMO_PAYMENTS")
 NEWSROOM_ITEMS_PER_RUN = int(os.getenv("NEWSROOM_ITEMS_PER_RUN", "10"))
 AI_PROVIDER = os.getenv("AI_PROVIDER", "groq")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
