@@ -1,6 +1,7 @@
-from wagtail.models import Page
 from django.db import models
+from wagtail.models import Page
 from wagtail.admin.panels import FieldPanel
+
 
 class HomePage(Page):
     intro = models.TextField(blank=True)
@@ -11,5 +12,7 @@ class HomePage(Page):
     def get_context(self, request, *args, **kwargs):
         from newsroom.models import ArticlePage
         context = super().get_context(request, *args, **kwargs)
-        context["latest_articles"] = ArticlePage.objects.live().public().order_by("-first_published_at")[:24]
+        published = ArticlePage.objects.live().public()
+        context["latest_editorial"] = published.filter(kind="editorial").order_by("-first_published_at")[:6]
+        context["latest_releases"] = published.filter(kind="press_release").order_by("-first_published_at")[:3]
         return context

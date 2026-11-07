@@ -48,3 +48,8 @@ Edit `SITE_NAME`, `SITE_TAGLINE`, `SITE_DOMAIN`, `SITE_LANGUAGE` in `.env`, then
 ## Licensing
 
 Project-specific original code: MIT. Third-party dependencies retain their own licenses (including Wagtail under BSD-3-Clause). See `LICENSE`.
+
+
+## User-facing routes
+
+See [docs/NAVIGATION.md](docs/NAVIGATION.md). Staff work begins at `/control/`, editorial articles are authored in `/cms/`, and publishers use `/publisher/`. `/staff/` is advanced Django administration, not the normal dashboard.

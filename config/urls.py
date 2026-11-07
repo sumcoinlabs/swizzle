@@ -5,11 +5,19 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.contrib.sitemaps.views import sitemap
 from website import views as website_views
+from website import control as website_control
 from publishers import views as publisher_views
 from website.feeds import EditorialFeed, AllArticlesFeed
 
+# Low-level Django administration is an advanced tool; staff start at /control/.
+admin.site.site_header = "Swizzle · Advanced data administration"
+admin.site.site_title = "Swizzle · Advanced administration"
+admin.site.index_title = "Internal records — use the Newsroom Control Center for daily work"
+admin.site.site_url = "/control/"
+
 urlpatterns = [
     path("staff/", admin.site.urls),
+    path("control/", website_control.dashboard, name="control"),
     path("cms/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("account/", include("accounts.urls")),

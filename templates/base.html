@@ -15,19 +15,28 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <div class="topbar"><div class="container topbar-inner"><span>INDEPENDENT NEWS &amp; ANNOUNCEMENTS</span><a href="{% url 'rss_all' %}">RSS FEED</a></div></div>
+  <div class="topbar"><div class="container topbar-inner"><span>INDEPENDENT NEWS &amp; CLEARLY LABELED PRESS RELEASES</span><div class="top-links">{% if request.user.is_authenticated and request.user.is_staff %}<a href="{% url 'control' %}">Staff workspace</a>{% endif %}<a href="{% url 'rss_all' %}">RSS feed</a></div></div></div>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="/">{% if brand_logo_url %}<img src="{{ brand_logo_url }}" class="brand-logo" alt="" height="34" width="34">{% else %}<span class="brand-mark">◈</span>{% endif %}<span class="brand-name">{{ brand_name }}</span></a>
+      <a class="brand" href="/" aria-label="{{ brand_name }} homepage">{% if brand_logo_url %}<img src="{{ brand_logo_url }}" class="brand-logo" alt="" height="34" width="34">{% else %}<span class="brand-mark" aria-hidden="true">◈</span>{% endif %}<span class="brand-name">{{ brand_name }}</span></a>
       <nav aria-label="Main navigation">
-        <a href="/news/">Latest</a><a href="/news/?category=crypto">Crypto</a><a href="/news/?category=otc">OTC</a>
-        <a href="/news/?category=technology">Technology</a><a href="{% url 'search' %}">Search</a>
+        <a href="/news/">Latest</a>
+        <a href="/news/?category=crypto">Crypto</a>
+        <a href="/news/?category=markets">Markets</a>
+        <a href="/news/?category=otc">OTC</a>
+        <a href="/news/?category=technology">Technology</a>
+        <a href="{% url 'search' %}">Search</a>
       </nav>
-      <div class="header-actions"><a class="button ghost small" href="{% url 'publishers:dashboard' %}">Publisher portal</a></div>
+      <div class="header-actions">
+        {% if request.user.is_authenticated %}
+          {% if request.user.is_staff %}<a class="button ghost small" href="{% url 'control' %}">Control Center</a>{% else %}<a class="button ghost small" href="{% url 'publishers:dashboard' %}">My account</a>{% endif %}
+        {% else %}<a class="header-login" href="{% url 'accounts:login' %}">Log in</a>{% endif %}
+        <a class="button primary small" href="{% url 'publishers:dashboard' %}">Publish a release</a>
+      </div>
     </div>
   </header>
   {% if messages %}<div class="container messages" role="status">{% for message in messages %}<div class="notice">{{ message }}</div>{% endfor %}</div>{% endif %}
   <main id="main">{% block content %}{% endblock %}</main>
-  <footer class="site-footer"><div class="container footer-inner"><div><strong>{{ brand_name }}</strong><p>Independent editorial coverage and clearly marked press releases.</p></div><div><a href="/news/">News</a><a href="{% url 'rss_editorial' %}">Editorial RSS</a><a href="{% url 'publishers:dashboard' %}">Submit a release</a></div></div><div class="container fineprint">Press releases are submitted by third parties and are not independent reporting. Publication here does not constitute regulatory filing or guaranteed newswire distribution.</div></footer>
+  <footer class="site-footer"><div class="container footer-inner"><div><strong>{{ brand_name }}</strong><p>Independent editorial coverage and clearly marked paid announcements.</p></div><div><a href="/news/">Latest news</a><a href="{% url 'rss_editorial' %}">Editorial RSS</a><a href="{% url 'publishers:dashboard' %}">Publish a release</a>{% if request.user.is_authenticated and request.user.is_staff %}<a href="{% url 'control' %}">Staff workspace</a>{% endif %}</div></div><div class="container fineprint">Press releases are submitted by third parties and are not independent reporting. Publication here does not constitute a regulatory filing or guaranteed newswire distribution.</div></footer>
 </body>
 </html>
